@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,13 +7,12 @@ def simulate_queue_trajectory(
 	total_time: float,
 	dt: float = 0.01,
 	initial_queue: int = 0,
-	seed: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
 
 	p_arrival = lam * dt
 	p_depart = mu * dt
 
-	rng = np.random.default_rng(seed)
+	rng = np.random.default_rng()
 
 	times = np.arange(0, total_time + dt, dt)
 	queue = np.zeros(times.shape[0], dtype=int)
@@ -39,26 +36,20 @@ def simulate_many_and_cv(
 	total_time: float,
 	n_samples: int = 500,
 	dt: float = 0.01,
-	initial_queue: int = 0,
-	seed: int | None = 0,
+	initial_queue: int = 0
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-	if n_samples <= 1:
-		raise ValueError("n_samples must be > 1")
 
-	base_rng = np.random.default_rng(seed)
-	child_seeds = base_rng.integers(0, 2**32 - 1, size=n_samples, dtype=np.uint64)
 
 	trajectories = []
 	times_ref = None
 
-	for s in child_seeds:
+	for _ in range(n_samples):
 		times, q = simulate_queue_trajectory(
 			lam=lam,
 			mu=mu,
 			total_time=total_time,
 			dt=dt,
-			initial_queue=initial_queue,
-			seed=int(s),
+			initial_queue=initial_queue
 		)
 		if times_ref is None:
 			times_ref = times
@@ -100,7 +91,6 @@ if __name__ == "__main__":
 		n_samples=n_samples,
 		dt=dt,
 		initial_queue=0,
-		seed=42,
 	)
 
 	print(f"Simulated {n_samples} trajectories up to {total_time} minutes")
